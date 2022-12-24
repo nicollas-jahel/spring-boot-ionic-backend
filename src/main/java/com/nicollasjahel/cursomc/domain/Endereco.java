@@ -1,6 +1,7 @@
 package com.nicollasjahel.cursomc.domain;
 
 import java.io.Serializable;
+import java.util.Optional;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
