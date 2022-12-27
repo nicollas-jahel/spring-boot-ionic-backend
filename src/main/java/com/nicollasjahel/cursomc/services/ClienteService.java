@@ -16,6 +16,7 @@ import com.nicollasjahel.cursomc.domain.Cidade;
 import com.nicollasjahel.cursomc.domain.Cliente;
 import com.nicollasjahel.cursomc.domain.Endereco;
 import com.nicollasjahel.cursomc.domain.enums.TipoCliente;
+import com.nicollasjahel.cursomc.dto.ClienteDTO;
 import com.nicollasjahel.cursomc.dto.ClienteNewDTO;
 import com.nicollasjahel.cursomc.repositories.CidadeRepository;
 import com.nicollasjahel.cursomc.repositories.ClienteRepository;
@@ -77,7 +78,8 @@ public class ClienteService {
 	
 	public Cliente fromDTO(ClienteNewDTO objDto) {
 		Cliente cli = new Cliente(null, objDto.getNome(), objDto.getEmail(), objDto.getCpfOuCnpj(), TipoCliente.toEnum(objDto.getTipo()));
-		Cidade cid = cidadeRepository.getById(objDto.getCidadeId());
+		Cidade cid = new Cidade(objDto.getCidadeId(), null, null);
+		//Cidade cid = cidadeRepository.getById(objDto.getCidadeId());
 		Endereco end = new Endereco(null, objDto.getLogradouro(), objDto.getNumero(), objDto.getComplemento(), objDto.getBairro(), objDto.getCep(), cli, cid);
 		
 		cli.getEnderecos().add(end);
@@ -91,9 +93,14 @@ public class ClienteService {
 		return cli;
 	}
 	
+	public Cliente fromDTO(ClienteDTO objDto) {
+		return new Cliente(objDto.getId(), objDto.getNome(), objDto.getEmail(), null, null);
+	}
+	
 	private void updateData(Cliente newObj, Cliente obj) {
 		newObj.setNome(obj.getNome());
 		newObj.setEmail(obj.getEmail());
+		
 	}
 
 }
