@@ -2,7 +2,6 @@ package com.nicollasjahel.cursomc.services;
 
 import java.util.Date;
 
-import javax.mail.Address;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
