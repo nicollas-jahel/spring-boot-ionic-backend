@@ -35,9 +35,6 @@ public class ClienteService {
 	private ClienteRepository repo;
 	
 	@Autowired
-	private CidadeRepository cidadeRepository;
-	
-	@Autowired
 	private EnderecoRepository enderecoRepository;
 	
 	public Cliente find(Integer id) {
