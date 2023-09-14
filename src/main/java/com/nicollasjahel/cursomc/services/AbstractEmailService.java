@@ -13,6 +13,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+import com.nicollasjahel.cursomc.domain.Cliente;
 import com.nicollasjahel.cursomc.domain.Pedido;
 
 public abstract class AbstractEmailService implements EmailService {
@@ -27,19 +28,24 @@ public abstract class AbstractEmailService implements EmailService {
 	private JavaMailSender javaMailSender;
 
 	@Override
-	public void sendOrderConfirmationEmail(Pedido obj) {
-		SimpleMailMessage sm = prepareSimpleMailMessageFromPedido(obj);
-		sendEmail(sm);
+	public void sendOrderConfirmationEmail(Pedido obj){
+		try {
+			MimeMessage sm = prepareSimpleMailMessageFromPedido(obj);
+			sendEmail(sm);
+			}catch (MessagingException e) {
+				throw new RuntimeException(e);	
+			}
 	}
 
-	protected SimpleMailMessage prepareSimpleMailMessageFromPedido(Pedido obj) {
-		SimpleMailMessage sm = new SimpleMailMessage();
-		sm.setTo(obj.getCliente().getEmail());
-		sm.setFrom(sender);
-		sm.setSubject("Pedido confirmado! Código: " + obj.getId());
-		sm.setSentDate(new Date(System.currentTimeMillis()));
-		sm.setText(obj.toString());
-		return sm;
+	protected MimeMessage prepareSimpleMailMessageFromPedido(Pedido obj) throws MessagingException {
+		MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+		MimeMessageHelper mmh = new MimeMessageHelper(mimeMessage, true);
+		mmh.setTo(obj.getCliente().getEmail());
+		mmh.setFrom(sender);
+		mmh.setSubject("Pedido confirmado! Código: " + obj.getId());
+		mmh.setSentDate(new Date(System.currentTimeMillis()));
+		mmh.setText(obj.toString());
+		return mimeMessage;
 	}
 
 	protected String htmlFromTemplatePedido(Pedido obj) {
@@ -66,6 +72,27 @@ public abstract class AbstractEmailService implements EmailService {
 		mmh.setSubject("Pedido confirmado! Código: " + obj.getId());
 		mmh.setSentDate(new Date(System.currentTimeMillis()));
 		mmh.setText(htmlFromTemplatePedido(obj), true);
+		return mimeMessage;
+	}
+	
+	@Override
+	public void sendNewPasswordEmail(Cliente cliente, String newPass) {
+		try {
+		MimeMessage sm = prepareNewPasswordEmail(cliente, newPass);
+		sendEmail(sm);
+		}catch (MessagingException e) {
+			throw new RuntimeException(e);	
+		}
+	}
+	
+	protected MimeMessage prepareNewPasswordEmail(Cliente cliente, String newPass) throws MessagingException {
+		MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+		MimeMessageHelper mmh = new MimeMessageHelper(mimeMessage, true);
+		mmh.setTo(cliente.getEmail());
+		mmh.setFrom(sender);
+		mmh.setSubject("Solicitação de nova senha");
+		mmh.setSentDate(new Date(System.currentTimeMillis()));
+		mmh.setText("Nova senha: " + newPass);
 		return mimeMessage;
 	}
 
