@@ -24,7 +24,7 @@ public class AuthService {
 	
 	private Random rand = new Random();
 	
-	public void sendNewPassaword(String email) {
+	public void sendNewPassword(String email) {
 		Cliente cliente = clienteRepository.findByEmail(email);
 		if(cliente == null) {
 			throw new ObjectNotFoundException("Email não encontrado");
