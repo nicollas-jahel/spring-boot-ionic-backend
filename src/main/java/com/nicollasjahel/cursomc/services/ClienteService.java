@@ -24,7 +24,6 @@ import com.nicollasjahel.cursomc.domain.enums.Perfil;
 import com.nicollasjahel.cursomc.domain.enums.TipoCliente;
 import com.nicollasjahel.cursomc.dto.ClienteDTO;
 import com.nicollasjahel.cursomc.dto.ClienteNewDTO;
-import com.nicollasjahel.cursomc.repositories.CidadeRepository;
 import com.nicollasjahel.cursomc.repositories.ClienteRepository;
 import com.nicollasjahel.cursomc.repositories.EnderecoRepository;
 import com.nicollasjahel.cursomc.security.UserSS;
@@ -43,9 +42,6 @@ public class ClienteService {
 	
 	@Autowired
 	private EnderecoRepository enderecoRepository;
-	
-	@Autowired
-	private CidadeRepository cidadeRepository;
 	
 	@Autowired
 	private S3Service s3Service;
@@ -99,6 +95,21 @@ public class ClienteService {
 		return repo.findAll();
 	}
 	
+	public Cliente findByEmail(String email) {
+		
+		UserSS user = UserService.authenticated();
+		if(user == null || !user.hasRole(Perfil.ADMIN) && !email.equals(user.getUsername())) {
+			throw new AuthorizationException("Acesso negado");
+		}
+		
+		Cliente obj = repo.findByEmail(email);
+		if(obj == null) {
+			throw new ObjectNotFoundException("Objeto não encontrado! ID: " + user.getId()
+			+ ", Tipo: " + Cliente.class.getName());
+		}
+		return obj;
+	}
+	
 	public Page<Cliente> findPage(Integer page, Integer linesPerPage, String orderBy, String direction){
 		PageRequest pageRequest = PageRequest.of(page, linesPerPage, Direction.valueOf(direction), orderBy);
 		return repo.findAll(pageRequest);
@@ -110,8 +121,8 @@ public class ClienteService {
 	
 	public Cliente fromDTO(ClienteNewDTO objDto) {
 		Cliente cli = new Cliente(null, objDto.getNome(), objDto.getEmail(), objDto.getCpfOuCnpj(), TipoCliente.toEnum(objDto.getTipo()), pe.encode(objDto.getSenha()));
-		//Cidade cid = new Cidade(objDto.getCidadeId(), null, null);
-		Cidade cid = cidadeRepository.getById(objDto.getCidadeId());
+		Cidade cid = new Cidade(objDto.getCidadeId(), null, null);
+		//Cidade cid = cidadeRepository.getById(objDto.getCidadeId());
 		Endereco end = new Endereco(null, objDto.getLogradouro(), objDto.getNumero(), objDto.getComplemento(), objDto.getBairro(), objDto.getCep(), cli, cid);
 		
 		cli.getEnderecos().add(end);
